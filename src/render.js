@@ -72,6 +72,15 @@ const iconPlayer2Img = new Image();
 iconPlayer2Img.crossOrigin = "anonymous";
 iconPlayer2Img.src = "/images/icon_player_2.png";
 
+// Кнопки управления из архива
+const buttonLeftImg = new Image();
+buttonLeftImg.crossOrigin = "anonymous";
+buttonLeftImg.src = "/images/button_left.png";
+
+const buttonRightImg = new Image();
+buttonRightImg.crossOrigin = "anonymous";
+buttonRightImg.src = "/images/button_right.png";
+
 // Маскоты для эффектов при отбивании и голах
 const mascotImages = [];
 const mascotPaths = [
@@ -339,7 +348,7 @@ export class Renderer {
 
     // Используем PNG заголовка из архива
     if (titleImg.complete && titleImg.naturalWidth > 0) {
-      const imgH = title.h * 1.5;
+      const imgH = title.h * 1.2;
       const imgW = (titleImg.naturalWidth / titleImg.naturalHeight) * imgH;
       ctx.drawImage(titleImg, cx - imgW / 2, cy - imgH / 2, imgW, imgH);
     } else {
@@ -379,14 +388,14 @@ export class Renderer {
   drawSpeechBubble(t) {
     const ctx = this.ctx;
     const { field, min } = this.layout;
-    const bx = field.x + field.w + min * 0.04;
-    const by = field.y - min * 0.04;
+    const bx = field.x + field.w + min * 0.03;
+    const by = field.y - min * 0.02;
 
     // Используем PNG speech bubble из архива
     if (speechBubbleImg.complete && speechBubbleImg.naturalWidth > 0) {
-      const imgH = min * 0.12;
+      const imgH = min * 0.08;
       const imgW = (speechBubbleImg.naturalWidth / speechBubbleImg.naturalHeight) * imgH;
-      ctx.drawImage(speechBubbleImg, bx - imgW * 0.2, by, imgW, imgH);
+      ctx.drawImage(speechBubbleImg, bx, by - imgH * 0.3, imgW, imgH);
     } else {
       // Fallback
       const bw = min * 0.16;
@@ -434,25 +443,11 @@ export class Renderer {
     const ctx = this.ctx;
     const { field, min } = this.layout;
 
-    // Используем PNG doodles из архива
-    if (doodleBottomLeftImg.complete && doodleBottomLeftImg.naturalWidth > 0) {
-      const doodleH = min * 0.06;
-      const doodleW = (doodleBottomLeftImg.naturalWidth / doodleBottomLeftImg.naturalHeight) * doodleH;
-      ctx.drawImage(doodleBottomLeftImg, field.x - doodleW * 0.3, field.y + field.h + min * 0.02, doodleW, doodleH);
-    }
-    
-    if (doodleBottomRightImg.complete && doodleBottomRightImg.naturalWidth > 0) {
-      const doodleH = min * 0.06;
-      const doodleW = (doodleBottomRightImg.naturalWidth / doodleBottomRightImg.naturalHeight) * doodleH;
-      ctx.drawImage(doodleBottomRightImg, field.x + field.w - doodleW * 0.7, field.y + field.h + min * 0.02, doodleW, doodleH);
-    }
-
-    // Fallback декоративные элементы
     ctx.save();
     ctx.strokeStyle = BRAND.colors.accent;
     ctx.lineWidth = 1.5;
 
-    // Волнистые линии
+    // Волнистые линии (небольшие декоративные элементы)
     const drawSquiggle = (x, y, size, rot) => {
       ctx.save();
       ctx.translate(x, y);
@@ -468,12 +463,12 @@ export class Renderer {
       ctx.restore();
     };
 
-    drawSquiggle(field.x - min * 0.08, field.y + field.h * 0.8, min * 0.045, 0.3);
-    drawSquiggle(field.x + field.w + min * 0.04, field.y + field.h * 0.7, min * 0.035, -0.2);
+    drawSquiggle(field.x - min * 0.06, field.y + field.h * 0.85, min * 0.035, 0.3);
+    drawSquiggle(field.x + field.w + min * 0.03, field.y + field.h * 0.75, min * 0.03, -0.2);
     
     // Звезды
-    drawStar(ctx, field.x + field.w + min * 0.1, field.y - min * 0.04, min * 0.015, BRAND.colors.accent, 1.5);
-    drawStar(ctx, field.x - min * 0.05, field.y + field.h * 0.3, min * 0.01, BRAND.colors.accent, 1.5);
+    drawStar(ctx, field.x + field.w + min * 0.08, field.y - min * 0.02, min * 0.012, BRAND.colors.accent, 1.5);
+    drawStar(ctx, field.x - min * 0.04, field.y + field.h * 0.35, min * 0.008, BRAND.colors.accent, 1.5);
 
     ctx.restore();
   }
@@ -486,7 +481,7 @@ export class Renderer {
     
     if (usePngLabels) {
       // Левый игрок - PNG (поворот на +90° - текст читается снизу вверх)
-      const labelH = min * 0.12;
+      const labelH = min * 0.08;
       const labelW = (labelPlayer1Img.naturalWidth / labelPlayer1Img.naturalHeight) * labelH;
       
       ctx.save();
@@ -497,7 +492,7 @@ export class Renderer {
       
       // Правый игрок - PNG
       if (labelPlayer2Img.complete && labelPlayer2Img.naturalWidth > 0) {
-        const labelH2 = min * 0.12;
+        const labelH2 = min * 0.08;
         const labelW2 = (labelPlayer2Img.naturalWidth / labelPlayer2Img.naturalHeight) * labelH2;
         
         ctx.save();
@@ -509,14 +504,14 @@ export class Renderer {
       
       // Иконки игроков (маскоты над лейблами)
       if (iconPlayer1Img.complete && iconPlayer1Img.naturalWidth > 0) {
-        const iconH = min * 0.04;
+        const iconH = min * 0.03;
         const iconW = (iconPlayer1Img.naturalWidth / iconPlayer1Img.naturalHeight) * iconH;
-        ctx.drawImage(iconPlayer1Img, controls.leftX + controls.size / 2 - iconW / 2, controls.labelY - min * 0.08, iconW, iconH);
+        ctx.drawImage(iconPlayer1Img, controls.leftX + controls.size / 2 - iconW / 2, controls.labelY - min * 0.06, iconW, iconH);
       }
       if (iconPlayer2Img.complete && iconPlayer2Img.naturalWidth > 0) {
-        const iconH = min * 0.04;
+        const iconH = min * 0.03;
         const iconW = (iconPlayer2Img.naturalWidth / iconPlayer2Img.naturalHeight) * iconH;
-        ctx.drawImage(iconPlayer2Img, this.w - controls.rightX - controls.size / 2 - iconW / 2, controls.labelY - min * 0.08, iconW, iconH);
+        ctx.drawImage(iconPlayer2Img, this.w - controls.rightX - controls.size / 2 - iconW / 2, controls.labelY - min * 0.06, iconW, iconH);
       }
     } else {
       // Fallback - рисуем программно
@@ -571,9 +566,9 @@ export class Renderer {
 
     // Используем PNG badges из архива
     if (badge8bitRecordImg.complete && badge8bitRecordImg.naturalWidth > 0) {
-      const imgH = btnH * 1.5;
+      const imgH = btnH * 1.2;
       const imgW = (badge8bitRecordImg.naturalWidth / badge8bitRecordImg.naturalHeight) * imgH;
-      ctx.drawImage(badge8bitRecordImg, field.x, bottomButtons.y - imgH * 0.2, imgW, imgH);
+      ctx.drawImage(badge8bitRecordImg, field.x, bottomButtons.y, imgW, imgH);
     } else {
       // Fallback левая кнопка
       const btnW1 = min * 0.14;
@@ -592,9 +587,9 @@ export class Renderer {
     }
 
     if (badgeWin8bitImg.complete && badgeWin8bitImg.naturalWidth > 0) {
-      const imgH = btnH * 1.5;
+      const imgH = btnH * 1.2;
       const imgW = (badgeWin8bitImg.naturalWidth / badgeWin8bitImg.naturalHeight) * imgH;
-      ctx.drawImage(badgeWin8bitImg, field.x + field.w - imgW, bottomButtons.y - imgH * 0.2, imgW, imgH);
+      ctx.drawImage(badgeWin8bitImg, field.x + field.w - imgW, bottomButtons.y, imgW, imgH);
     } else {
       // Fallback правая кнопка
       const btnW2 = min * 0.18;

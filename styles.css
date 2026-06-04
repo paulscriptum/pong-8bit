@@ -137,34 +137,41 @@ body {
   transform: translateY(-50%) rotate(180deg);
 }
 
-/* Кнопки в стиле брендбука - фиолетовый фон с закругленными углами */
+/* Кнопки управления - используем PNG из архива, повернутые на 90° */
 .ctrl-btn {
   pointer-events: auto;
   width: var(--control-size);
   height: var(--control-size);
   border-radius: 12px;
-  border: 2px solid var(--accent);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-brand);
-  font-weight: 500;
-  font-size: calc(var(--control-size) * 0.4);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: none;
+  background: url('/images/button_left.png') center/contain no-repeat;
+  color: transparent;
+  font-size: 0;
   cursor: pointer;
   touch-action: none;
-  transition: transform 0.06s ease, background 0.1s ease, color 0.1s ease;
+  transition: transform 0.06s ease, opacity 0.1s ease;
   position: relative;
-  box-shadow: 0 2px 8px rgba(107, 92, 231, 0.15);
+  transform: rotate(90deg); /* Поворачиваем стрелку вверх */
+}
+
+/* Кнопка вниз - поворот на -90° */
+.ctrl-btn[data-dir="down"] {
+  transform: rotate(-90deg);
+}
+
+/* Правые кнопки используют button_right.png */
+.controls-right .ctrl-btn {
+  background-image: url('/images/button_right.png');
+  transform: rotate(-90deg); /* Поворачиваем стрелку вверх */
+}
+
+.controls-right .ctrl-btn[data-dir="up"] {
+  transform: rotate(90deg); /* Вниз для правого игрока */
 }
 
 .ctrl-btn.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--ink);
-  transform: scale(0.96);
+  filter: brightness(0.9);
+  opacity: 0.85;
 }
 
 /* Убираем outline на фокусе */
