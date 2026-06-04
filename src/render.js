@@ -19,9 +19,15 @@ const spikyImg = new Image();
 spikyImg.crossOrigin = "anonymous";
 spikyImg.src = "/images/right_paddle_spiky.png";
 
+// Мяч - оригинальный чип с лицом и "ножками"
 const ballImg = new Image();
 ballImg.crossOrigin = "anonymous";
-ballImg.src = "/images/ball_chip.png";
+ballImg.src = "/images/ball.png";
+
+// Рамка игрового поля (hand-drawn style)
+const frameBorderImg = new Image();
+frameBorderImg.crossOrigin = "anonymous";
+frameBorderImg.src = "/images/frame_border.svg";
 
 // UI элементы из архива
 const titleImg = new Image();
@@ -48,13 +54,23 @@ const badgeWin8bitImg = new Image();
 badgeWin8bitImg.crossOrigin = "anonymous";
 badgeWin8bitImg.src = "/images/badge_win_8bit.png";
 
-const buttonLeftImg = new Image();
-buttonLeftImg.crossOrigin = "anonymous";
-buttonLeftImg.src = "/images/button_left.png";
+// Декоративные элементы (doodles)
+const doodleBottomLeftImg = new Image();
+doodleBottomLeftImg.crossOrigin = "anonymous";
+doodleBottomLeftImg.src = "/images/doodle_bottom_left.png";
 
-const buttonRightImg = new Image();
-buttonRightImg.crossOrigin = "anonymous";
-buttonRightImg.src = "/images/button_right.png";
+const doodleBottomRightImg = new Image();
+doodleBottomRightImg.crossOrigin = "anonymous";
+doodleBottomRightImg.src = "/images/doodle_bottom_right.png";
+
+// Иконки игроков (маскоты рядом с лейблами)
+const iconPlayer1Img = new Image();
+iconPlayer1Img.crossOrigin = "anonymous";
+iconPlayer1Img.src = "/images/icon_player_1.png";
+
+const iconPlayer2Img = new Image();
+iconPlayer2Img.crossOrigin = "anonymous";
+iconPlayer2Img.src = "/images/icon_player_2.png";
 
 // Маскоты для эффектов при отбивании и голах
 const mascotImages = [];
@@ -274,31 +290,23 @@ export class Renderer {
     ctx.fillStyle = BRAND.colors.bg;
     ctx.fillRect(0, 0, this.w, this.h);
 
-    // Декоративные элементы
+    // Декоративные элементы (doodles из PNG)
     this.drawDecorations(t);
 
-    // Заголовок
+    // Заголовок (PNG из архива)
     this.drawTitleBanner(title, min);
 
-    // Спич-баббл справа
+    // Спич-баббл справа (PNG из архива)
     this.drawSpeechBubble(t);
 
     // Лого слева
     this.drawLogo(min);
 
-    // Лейблы игроков
+    // Лейблы игроков (PNG из архива)
     this.drawPlayerLabels(controls, min);
 
-    // Внешняя рамка поля
-    const padding = min * 0.015;
-    ctx.fillStyle = BRAND.colors.bg;
-    ctx.strokeStyle = BRAND.colors.accent;
-    ctx.lineWidth = 3;
-    
-    ctx.beginPath();
-    ctx.roundRect(field.x - padding, field.y - padding, field.w + padding * 2, field.h + padding * 2, field.r + padding);
-    ctx.fill();
-    ctx.stroke();
+    // Рамка поля - используем SVG frame_border
+    this.drawFieldFrame(field, min);
 
     // Внутреннее черное поле
     ctx.fillStyle = BRAND.colors.field;
@@ -306,90 +314,117 @@ export class Renderer {
     ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
     ctx.fill();
 
-    // Нижние кнопки
+    // Нижние кнопки (PNG из архива)
     this.drawBottomButtons(bottomButtons, field, min);
 
     ctx.restore();
   }
+  
+  drawFieldFrame(field, min) {
+    const ctx = this.ctx;
+    const padding = min * 0.02;
+    
+    // Фиолетовая рамка с скругленными углами
+    ctx.strokeStyle = BRAND.colors.accent;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.roundRect(field.x - padding, field.y - padding, field.w + padding * 2, field.h + padding * 2, field.r + padding);
+    ctx.stroke();
+    
+    // Рисуем hand-drawn frame SVG поверх (если загружен)
+    if (frameBorderImg.complete && frameBorderImg.naturalWidth > 0) {
+      const frameW = field.w + padding * 4;
+      const frameH = (frameBorderImg.naturalHeight / frameBorderImg.naturalWidth) * frameW;
+      
+      // Верхняя граница
+      ctx.drawImage(frameBorderImg, field.x - padding * 2, field.y - padding * 2 - frameH * 0.3, frameW, frameH);
+      
+      // Нижняя граница (перевернутая)
+      ctx.save();
+      ctx.translate(field.x + field.w / 2, field.y + field.h + padding * 2);
+      ctx.scale(1, -1);
+      ctx.drawImage(frameBorderImg, -frameW / 2, -frameH * 0.7, frameW, frameH);
+      ctx.restore();
+    }
+  }
 
   drawTitleBanner(title, min) {
     const ctx = this.ctx;
-    const bannerW = title.w;
-    const bannerH = title.h * 1.4;
     const cx = title.x;
     const cy = title.y;
 
-    ctx.save();
+    // Используем PNG заголовка из архива
+    if (titleImg.complete && titleImg.naturalWidth > 0) {
+      const imgH = title.h * 1.5;
+      const imgW = (titleImg.naturalWidth / titleImg.naturalHeight) * imgH;
+      ctx.drawImage(titleImg, cx - imgW / 2, cy - imgH / 2, imgW, imgH);
+    } else {
+      // Fallback - рисуем программно
+      const bannerW = title.w;
+      const bannerH = title.h * 1.4;
 
-    // Фиолетовый баннер с волнистым краем
-    ctx.fillStyle = BRAND.colors.accent;
-    ctx.beginPath();
-    
-    const points = 24;
-    const baseR = bannerW / 2;
-    const baseRy = bannerH / 2;
-    for (let i = 0; i <= points; i++) {
-      const angle = (i / points) * Math.PI * 2;
-      const wobble = 1 + Math.sin(angle * 6) * 0.08;
-      const rx = baseR * wobble;
-      const ry = baseRy * wobble;
-      const px = cx + Math.cos(angle) * rx;
-      const py = cy + Math.sin(angle) * ry;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
+      ctx.save();
+      ctx.fillStyle = BRAND.colors.accent;
+      ctx.beginPath();
+      
+      const points = 24;
+      const baseR = bannerW / 2;
+      const baseRy = bannerH / 2;
+      for (let i = 0; i <= points; i++) {
+        const angle = (i / points) * Math.PI * 2;
+        const wobble = 1 + Math.sin(angle * 6) * 0.08;
+        const rx = baseR * wobble;
+        const ry = baseRy * wobble;
+        const px = cx + Math.cos(angle) * rx;
+        const py = cy + Math.sin(angle) * ry;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = `500 ${title.h * 0.5}px ${BRAND.fonts.brand}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(BRAND.title, cx, cy);
+      ctx.restore();
     }
-    ctx.closePath();
-    ctx.fill();
-
-    // Текст заголовка
-    ctx.font = `500 ${title.h * 0.5}px ${BRAND.fonts.brand}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText(BRAND.title, cx, cy);
-
-    ctx.restore();
   }
 
   drawSpeechBubble(t) {
     const ctx = this.ctx;
     const { field, min } = this.layout;
     const bx = field.x + field.w + min * 0.04;
-    const by = field.y - min * 0.01;
-    const bw = min * 0.16;
-    const bh = min * 0.05;
+    const by = field.y - min * 0.04;
 
-    ctx.save();
+    // Используем PNG speech bubble из архива
+    if (speechBubbleImg.complete && speechBubbleImg.naturalWidth > 0) {
+      const imgH = min * 0.12;
+      const imgW = (speechBubbleImg.naturalWidth / speechBubbleImg.naturalHeight) * imgH;
+      ctx.drawImage(speechBubbleImg, bx - imgW * 0.2, by, imgW, imgH);
+    } else {
+      // Fallback
+      const bw = min * 0.16;
+      const bh = min * 0.05;
 
-    // Баббл
-    ctx.fillStyle = BRAND.colors.bg;
-    ctx.strokeStyle = BRAND.colors.text;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 4);
-    ctx.fill();
-    ctx.stroke();
+      ctx.save();
+      ctx.fillStyle = BRAND.colors.bg;
+      ctx.strokeStyle = BRAND.colors.text;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(bx, by, bw, bh, 4);
+      ctx.fill();
+      ctx.stroke();
 
-    // Хвостик
-    ctx.beginPath();
-    ctx.moveTo(bx + bw * 0.15, by + bh);
-    ctx.lineTo(bx + bw * 0.08, by + bh + min * 0.012);
-    ctx.lineTo(bx + bw * 0.25, by + bh);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // Текст
-    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = BRAND.colors.text;
-    ctx.fillText(BRAND.cta, bx + bw / 2, by + bh / 2);
-
-    // Маскот-жучок
-    drawBug(ctx, bx + bw * 0.92, by - min * 0.008, min * 0.024, BRAND.colors.text);
-
-    ctx.restore();
+      ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = BRAND.colors.text;
+      ctx.fillText(BRAND.cta, bx + bw / 2, by + bh / 2);
+      drawBug(ctx, bx + bw * 0.92, by - min * 0.008, min * 0.024, BRAND.colors.text);
+      ctx.restore();
+    }
   }
 
   drawLogo(min) {
@@ -415,6 +450,20 @@ export class Renderer {
     const ctx = this.ctx;
     const { field, min } = this.layout;
 
+    // Используем PNG doodles из архива
+    if (doodleBottomLeftImg.complete && doodleBottomLeftImg.naturalWidth > 0) {
+      const doodleH = min * 0.06;
+      const doodleW = (doodleBottomLeftImg.naturalWidth / doodleBottomLeftImg.naturalHeight) * doodleH;
+      ctx.drawImage(doodleBottomLeftImg, field.x - doodleW * 0.3, field.y + field.h + min * 0.02, doodleW, doodleH);
+    }
+    
+    if (doodleBottomRightImg.complete && doodleBottomRightImg.naturalWidth > 0) {
+      const doodleH = min * 0.06;
+      const doodleW = (doodleBottomRightImg.naturalWidth / doodleBottomRightImg.naturalHeight) * doodleH;
+      ctx.drawImage(doodleBottomRightImg, field.x + field.w - doodleW * 0.7, field.y + field.h + min * 0.02, doodleW, doodleH);
+    }
+
+    // Fallback декоративные элементы
     ctx.save();
     ctx.strokeStyle = BRAND.colors.accent;
     ctx.lineWidth = 1.5;
@@ -447,86 +496,139 @@ export class Renderer {
 
   drawPlayerLabels(controls, min) {
     const ctx = this.ctx;
-    const labelW = min * 0.055;
-    const labelH = min * 0.018;
 
-    ctx.save();
+    // Используем PNG лейблы из архива
+    const usePngLabels = labelPlayer1Img.complete && labelPlayer1Img.naturalWidth > 0;
+    
+    if (usePngLabels) {
+      // Левый игрок - PNG (поворот на +90° - текст читается снизу вверх)
+      const labelH = min * 0.12;
+      const labelW = (labelPlayer1Img.naturalWidth / labelPlayer1Img.naturalHeight) * labelH;
+      
+      ctx.save();
+      ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(labelPlayer1Img, -labelW / 2, -labelH / 2, labelW, labelH);
+      ctx.restore();
+      
+      // Правый игрок - PNG
+      if (labelPlayer2Img.complete && labelPlayer2Img.naturalWidth > 0) {
+        const labelH2 = min * 0.12;
+        const labelW2 = (labelPlayer2Img.naturalWidth / labelPlayer2Img.naturalHeight) * labelH2;
+        
+        ctx.save();
+        ctx.translate(this.w - controls.rightX - controls.size / 2, controls.labelY);
+        ctx.rotate(Math.PI / 2);
+        ctx.drawImage(labelPlayer2Img, -labelW2 / 2, -labelH2 / 2, labelW2, labelH2);
+        ctx.restore();
+      }
+      
+      // Иконки игроков (маскоты над лейблами)
+      if (iconPlayer1Img.complete && iconPlayer1Img.naturalWidth > 0) {
+        const iconH = min * 0.04;
+        const iconW = (iconPlayer1Img.naturalWidth / iconPlayer1Img.naturalHeight) * iconH;
+        ctx.drawImage(iconPlayer1Img, controls.leftX + controls.size / 2 - iconW / 2, controls.labelY - min * 0.08, iconW, iconH);
+      }
+      if (iconPlayer2Img.complete && iconPlayer2Img.naturalWidth > 0) {
+        const iconH = min * 0.04;
+        const iconW = (iconPlayer2Img.naturalWidth / iconPlayer2Img.naturalHeight) * iconH;
+        ctx.drawImage(iconPlayer2Img, this.w - controls.rightX - controls.size / 2 - iconW / 2, controls.labelY - min * 0.08, iconW, iconH);
+      }
+    } else {
+      // Fallback - рисуем программно
+      const labelW = min * 0.055;
+      const labelH = min * 0.018;
 
-    // Левый игрок
-    ctx.save();
-    ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillStyle = BRAND.colors.accent;
-    ctx.beginPath();
-    ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
-    ctx.fill();
-    ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("ИГРОК 1", 0, 0);
-    ctx.restore();
+      ctx.save();
 
-    // Правый игрок
-    ctx.save();
-    ctx.translate(this.w - controls.rightX - controls.size / 2, controls.labelY);
-    ctx.rotate(Math.PI / 2);
-    ctx.fillStyle = BRAND.colors.accent;
-    ctx.beginPath();
-    ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
-    ctx.fill();
-    ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("ИГРОК 2", 0, 0);
-    ctx.restore();
+      // Левый игрок
+      ctx.save();
+      ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillStyle = BRAND.colors.accent;
+      ctx.beginPath();
+      ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
+      ctx.fill();
+      ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("ИГРОК 1", 0, 0);
+      ctx.restore();
 
-    // Маскоты
-    drawBug(ctx, controls.leftX + controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
-    drawBug(ctx, this.w - controls.rightX - controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
+      // Правый игрок
+      ctx.save();
+      ctx.translate(this.w - controls.rightX - controls.size / 2, controls.labelY);
+      ctx.rotate(Math.PI / 2);
+      ctx.fillStyle = BRAND.colors.accent;
+      ctx.beginPath();
+      ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
+      ctx.fill();
+      ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("ИГРОК 2", 0, 0);
+      ctx.restore();
 
-    ctx.restore();
+      // Маскоты
+      drawBug(ctx, controls.leftX + controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
+      drawBug(ctx, this.w - controls.rightX - controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
+
+      ctx.restore();
+    }
   }
 
   drawBottomButtons(bottomButtons, field, min) {
     const ctx = this.ctx;
     const btnH = bottomButtons.h;
-    const btnW1 = min * 0.14;
-    const btnW2 = min * 0.18;
 
     ctx.save();
 
-    // Левая кнопка
-    const btn1X = field.x;
-    const btn1Y = bottomButtons.y;
-    ctx.fillStyle = BRAND.colors.accent;
-    ctx.beginPath();
-    ctx.roundRect(btn1X, btn1Y, btnW1, btnH, 6);
-    ctx.fill();
-    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("8БИТ-РЕКОРД", btn1X + btnW1 / 2, btn1Y + btnH / 2);
-    
-    drawBug(ctx, btn1X + min * 0.016, btn1Y + btnH / 2, min * 0.012, "#ffffff");
+    // Используем PNG badges из архива
+    if (badge8bitRecordImg.complete && badge8bitRecordImg.naturalWidth > 0) {
+      const imgH = btnH * 1.5;
+      const imgW = (badge8bitRecordImg.naturalWidth / badge8bitRecordImg.naturalHeight) * imgH;
+      ctx.drawImage(badge8bitRecordImg, field.x, bottomButtons.y - imgH * 0.2, imgW, imgH);
+    } else {
+      // Fallback левая кнопка
+      const btnW1 = min * 0.14;
+      const btn1X = field.x;
+      const btn1Y = bottomButtons.y;
+      ctx.fillStyle = BRAND.colors.accent;
+      ctx.beginPath();
+      ctx.roundRect(btn1X, btn1Y, btnW1, btnH, 6);
+      ctx.fill();
+      ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText("8БИТ-РЕКОРД", btn1X + btnW1 / 2, btn1Y + btnH / 2);
+      drawBug(ctx, btn1X + min * 0.016, btn1Y + btnH / 2, min * 0.012, "#ffffff");
+    }
 
-    // Правая кнопка
-    const btn2X = field.x + field.w - btnW2;
-    ctx.fillStyle = BRAND.colors.bg;
-    ctx.strokeStyle = BRAND.colors.accent;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(btn2X, btn1Y, btnW2, btnH, 6);
-    ctx.fill();
-    ctx.stroke();
-    ctx.font = `500 ${min * 0.011}px ${BRAND.fonts.brand}`;
-    ctx.fillStyle = BRAND.colors.text;
-    ctx.fillText("ПОБЕЖДАЙ ПО-8БИТНОМУ!", btn2X + btnW2 / 2, btn1Y + btnH / 2);
-
-    drawBug(ctx, btn2X + min * 0.015, btn1Y + btnH / 2, min * 0.01, BRAND.colors.accent);
-    drawStar(ctx, btn2X + btnW2 - min * 0.02, btn1Y + btnH / 2, min * 0.008, BRAND.colors.accent, 1.5);
+    if (badgeWin8bitImg.complete && badgeWin8bitImg.naturalWidth > 0) {
+      const imgH = btnH * 1.5;
+      const imgW = (badgeWin8bitImg.naturalWidth / badgeWin8bitImg.naturalHeight) * imgH;
+      ctx.drawImage(badgeWin8bitImg, field.x + field.w - imgW, bottomButtons.y - imgH * 0.2, imgW, imgH);
+    } else {
+      // Fallback правая кнопка
+      const btnW2 = min * 0.18;
+      const btn2X = field.x + field.w - btnW2;
+      const btn1Y = bottomButtons.y;
+      ctx.fillStyle = BRAND.colors.bg;
+      ctx.strokeStyle = BRAND.colors.accent;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(btn2X, btn1Y, btnW2, btnH, 6);
+      ctx.fill();
+      ctx.stroke();
+      ctx.font = `500 ${min * 0.011}px ${BRAND.fonts.brand}`;
+      ctx.fillStyle = BRAND.colors.text;
+      ctx.fillText("ПОБЕЖДАЙ ПО-8БИТНОМУ!", btn2X + btnW2 / 2, btn1Y + btnH / 2);
+      drawBug(ctx, btn2X + min * 0.015, btn1Y + btnH / 2, min * 0.01, BRAND.colors.accent);
+      drawStar(ctx, btn2X + btnW2 - min * 0.02, btn1Y + btnH / 2, min * 0.008, BRAND.colors.accent, 1.5);
+    }
 
     ctx.restore();
   }
