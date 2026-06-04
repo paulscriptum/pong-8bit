@@ -52,7 +52,7 @@ export const BRAND = {
     maxBounceAngle: Math.PI / 3,
     paddleSpeedRatio: 1.2,
     countdownSeconds: 3,
-    gameOverSeconds: 14,
+    gameOverSeconds: 15,
   },
 };
 
