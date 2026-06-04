@@ -322,30 +322,14 @@ export class Renderer {
   
   drawFieldFrame(field, min) {
     const ctx = this.ctx;
-    const padding = min * 0.02;
+    const padding = min * 0.015;
     
-    // Фиолетовая рамка с скругленными углами
+    // Простая фиолетовая рамка с скругленными углами
     ctx.strokeStyle = BRAND.colors.accent;
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.roundRect(field.x - padding, field.y - padding, field.w + padding * 2, field.h + padding * 2, field.r + padding);
     ctx.stroke();
-    
-    // Рисуем hand-drawn frame SVG поверх (если загружен)
-    if (frameBorderImg.complete && frameBorderImg.naturalWidth > 0) {
-      const frameW = field.w + padding * 4;
-      const frameH = (frameBorderImg.naturalHeight / frameBorderImg.naturalWidth) * frameW;
-      
-      // Верхняя граница
-      ctx.drawImage(frameBorderImg, field.x - padding * 2, field.y - padding * 2 - frameH * 0.3, frameW, frameH);
-      
-      // Нижняя граница (перевернутая)
-      ctx.save();
-      ctx.translate(field.x + field.w / 2, field.y + field.h + padding * 2);
-      ctx.scale(1, -1);
-      ctx.drawImage(frameBorderImg, -frameW / 2, -frameH * 0.7, frameW, frameH);
-      ctx.restore();
-    }
   }
 
   drawTitleBanner(title, min) {
