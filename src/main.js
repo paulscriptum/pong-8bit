@@ -9,7 +9,7 @@ import { makeQRCanvas } from "./blobs.js";
 import { PongGame } from "./game.js";
 import { Renderer } from "./render.js";
 import { setupControls } from "./controls.js";
-import { drawBug } from "./mascots.js";
+import { drawBug, drawHorizontalCaterpillar } from "./mascots.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -197,30 +197,46 @@ function draw() {
 
 function drawAttract() {
   const min = Math.min(W, H);
-  const gameState = game.getState();
-  renderer.drawPlayfield(gameState, elapsed);
-  renderer.drawScores(game.scores);
-
   const field = renderer.getFieldRect();
 
+  // Рисуем внешний UI (логотип, заголовок, кнопки)
+  renderer.drawChrome(elapsed);
+
+  // Фиолетовый фон на все поле (как в Figma)
   ctx.save();
-  // Полупрозрачный оверлей на поле
-  ctx.fillStyle = "rgba(12,12,12,0.75)";
+  ctx.fillStyle = BRAND.colors.accent;
   ctx.beginPath();
   ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
   ctx.fill();
 
-  // Пульсирующий текст
-  ctx.globalAlpha = 0.7 + 0.3 * Math.sin(elapsed * 2.5);
-  drawText(
-    "КОСНИСЬ, ЧТОБЫ НАЧАТЬ",
-    W / 2,
-    field.y + field.h * 0.5,
-    min * 0.032,
-    BRAND.colors.ink,
-    BRAND.fonts.brand
-  );
+  // Фиолетовая рамка
+  ctx.strokeStyle = BRAND.colors.accent;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Текст "НАЖМИ, ЧТОБЫ ИГРАТЬ" по центру (пульсирующий)
+  ctx.globalAlpha = 0.85 + 0.15 * Math.sin(elapsed * 2.5);
+  ctx.font = `700 ${min * 0.038}px ${BRAND.fonts.brand}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = BRAND.colors.ink;
+  ctx.fillText("НАЖМИ, ЧТОБЫ ИГРАТЬ", W / 2, field.y + field.h * 0.4);
   ctx.globalAlpha = 1;
+
+  // Анимированная горизонтальная гусеница внизу экрана
+  const segR = min * 0.022;
+  const segmentCount = 14;
+  const caterpillarWidth = segmentCount * segR * 1.4;
+  
+  // Гусеница ползет справа налево, зацикленно
+  const speed = 60; // пикселей в секунду
+  const totalPath = field.w + caterpillarWidth * 2;
+  const rawX = (elapsed * speed) % totalPath;
+  const catX = field.x + field.w + caterpillarWidth - rawX;
+  const catY = field.y + field.h * 0.78;
+
+  drawHorizontalCaterpillar(ctx, catX, catY, segR, BRAND.colors.ink, elapsed, segmentCount);
+
   ctx.restore();
 }
 
