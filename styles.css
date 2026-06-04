@@ -166,3 +166,21 @@ body {
   color: var(--ink);
   transform: scale(0.96);
 }
+
+/* Убираем outline на фокусе */
+.ctrl-btn:focus {
+  outline: none;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 600px) {
+  :root {
+    --control-size: clamp(44px, 10vw, 70px);
+  }
+}
+
+@media (orientation: portrait) {
+  :root {
+    --control-top: 50%;
+  }
+}

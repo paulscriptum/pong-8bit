@@ -1,17 +1,27 @@
 // ===========================================================
 // ПОНГ · 8БИТ — отрисовка в стиле брендбука.
-// Светлый фон, фиолетовые акценты, маскоты как ракетки и мяч.
+// Используем PNG изображения для ракеток и мяча.
 // ===========================================================
 
 import BRAND from "./brand.js";
 import {
-  drawCaterpillar,
-  drawSpikyColumn,
-  drawChip,
   drawPixelNumber,
   drawBug,
   drawStar,
 } from "./mascots.js";
+
+// Загружаем PNG изображения
+const caterpillarImg = new Image();
+caterpillarImg.crossOrigin = "anonymous";
+caterpillarImg.src = "/images/caterpillar.png";
+
+const spikyImg = new Image();
+spikyImg.crossOrigin = "anonymous";
+spikyImg.src = "/images/spiky.png";
+
+const ballImg = new Image();
+ballImg.crossOrigin = "anonymous";
+ballImg.src = "/images/ball.png";
 
 export function computeSceneLayout(w, h) {
   const min = Math.min(w, h);
@@ -47,7 +57,6 @@ export function computeSceneLayout(w, h) {
       rightX: Math.max(min * 0.018, (sideGap - controlSize) / 2),
       labelY,
     },
-    // Кнопки внизу
     bottomButtons: {
       y: field.y + field.h + min * 0.05,
       h: min * 0.045,
@@ -147,10 +156,10 @@ export class Renderer {
     ctx.fillStyle = BRAND.colors.bg;
     ctx.fillRect(0, 0, this.w, this.h);
 
-    // Декоративные элементы (волны, звезды)
+    // Декоративные элементы
     this.drawDecorations(t);
 
-    // Заголовок на фиолетовом баннере
+    // Заголовок
     this.drawTitleBanner(title, min);
 
     // Спич-баббл справа
@@ -162,23 +171,21 @@ export class Renderer {
     // Лейблы игроков
     this.drawPlayerLabels(controls, min);
 
-    // Внешняя рамка поля (светлая с фиолетовой обводкой)
+    // Внешняя рамка поля
     const padding = min * 0.015;
     ctx.fillStyle = BRAND.colors.bg;
     ctx.strokeStyle = BRAND.colors.accent;
     ctx.lineWidth = 3;
     
-    // Закругленный прямоугольник
-    const rx = field.r;
     ctx.beginPath();
-    ctx.roundRect(field.x - padding, field.y - padding, field.w + padding * 2, field.h + padding * 2, rx + padding);
+    ctx.roundRect(field.x - padding, field.y - padding, field.w + padding * 2, field.h + padding * 2, field.r + padding);
     ctx.fill();
     ctx.stroke();
 
     // Внутреннее черное поле
     ctx.fillStyle = BRAND.colors.field;
     ctx.beginPath();
-    ctx.roundRect(field.x, field.y, field.w, field.h, rx);
+    ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
     ctx.fill();
 
     // Нижние кнопки
@@ -200,7 +207,6 @@ export class Renderer {
     ctx.fillStyle = BRAND.colors.accent;
     ctx.beginPath();
     
-    // Рисуем облачную/волнистую форму
     const points = 24;
     const baseR = bannerW / 2;
     const baseRy = bannerH / 2;
@@ -230,10 +236,10 @@ export class Renderer {
   drawSpeechBubble(t) {
     const ctx = this.ctx;
     const { field, min } = this.layout;
-    const bx = field.x + field.w + min * 0.06;
-    const by = field.y - min * 0.02;
-    const bw = min * 0.18;
-    const bh = min * 0.055;
+    const bx = field.x + field.w + min * 0.04;
+    const by = field.y - min * 0.01;
+    const bw = min * 0.16;
+    const bh = min * 0.05;
 
     ctx.save();
 
@@ -249,21 +255,21 @@ export class Renderer {
     // Хвостик
     ctx.beginPath();
     ctx.moveTo(bx + bw * 0.15, by + bh);
-    ctx.lineTo(bx + bw * 0.08, by + bh + min * 0.015);
+    ctx.lineTo(bx + bw * 0.08, by + bh + min * 0.012);
     ctx.lineTo(bx + bw * 0.25, by + bh);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     // Текст
-    ctx.font = `500 ${min * 0.016}px ${BRAND.fonts.brand}`;
+    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = BRAND.colors.text;
     ctx.fillText(BRAND.cta, bx + bw / 2, by + bh / 2);
 
-    // Маскот-жучок рядом
-    drawBug(ctx, bx + bw * 0.9, by - min * 0.01, min * 0.028, BRAND.colors.text);
+    // Маскот-жучок
+    drawBug(ctx, bx + bw * 0.92, by - min * 0.008, min * 0.024, BRAND.colors.text);
 
     ctx.restore();
   }
@@ -271,19 +277,19 @@ export class Renderer {
   drawLogo(min) {
     const ctx = this.ctx;
     const { field } = this.layout;
-    const lx = field.x - min * 0.08;
+    const lx = field.x - min * 0.06;
     const ly = field.y * 0.5;
 
     ctx.save();
-    ctx.font = `700 ${min * 0.035}px ${BRAND.fonts.brand}`;
+    ctx.font = `700 ${min * 0.032}px ${BRAND.fonts.brand}`;
     ctx.textAlign = "left";
     ctx.textBaseline = "middle";
     ctx.fillStyle = BRAND.colors.text;
     ctx.fillText("8БИТ", lx - min * 0.04, ly - min * 0.01);
 
-    ctx.font = `400 ${min * 0.012}px ${BRAND.fonts.ui}`;
-    ctx.fillText("Журнал", lx - min * 0.04, ly + min * 0.025);
-    ctx.fillText("Яндекс Образования", lx - min * 0.04, ly + min * 0.042);
+    ctx.font = `400 ${min * 0.011}px ${BRAND.fonts.ui}`;
+    ctx.fillText("Журнал", lx - min * 0.04, ly + min * 0.022);
+    ctx.fillText("Яндекс Образования", lx - min * 0.04, ly + min * 0.038);
     ctx.restore();
   }
 
@@ -295,7 +301,7 @@ export class Renderer {
     ctx.strokeStyle = BRAND.colors.accent;
     ctx.lineWidth = 1.5;
 
-    // Волнистые линии по углам
+    // Волнистые линии
     const drawSquiggle = (x, y, size, rot) => {
       ctx.save();
       ctx.translate(x, y);
@@ -311,26 +317,24 @@ export class Renderer {
       ctx.restore();
     };
 
-    // Различные декорации
-    drawSquiggle(field.x - min * 0.1, field.y + field.h * 0.8, min * 0.05, 0.3);
-    drawSquiggle(field.x + field.w + min * 0.05, field.y + field.h * 0.7, min * 0.04, -0.2);
+    drawSquiggle(field.x - min * 0.08, field.y + field.h * 0.8, min * 0.045, 0.3);
+    drawSquiggle(field.x + field.w + min * 0.04, field.y + field.h * 0.7, min * 0.035, -0.2);
     
     // Звезды
-    drawStar(ctx, field.x + field.w + min * 0.12, field.y - min * 0.05, min * 0.018, BRAND.colors.accent, 1.5);
-    drawStar(ctx, field.x - min * 0.06, field.y + field.h * 0.3, min * 0.012, BRAND.colors.accent, 1.5);
+    drawStar(ctx, field.x + field.w + min * 0.1, field.y - min * 0.04, min * 0.015, BRAND.colors.accent, 1.5);
+    drawStar(ctx, field.x - min * 0.05, field.y + field.h * 0.3, min * 0.01, BRAND.colors.accent, 1.5);
 
     ctx.restore();
   }
 
   drawPlayerLabels(controls, min) {
     const ctx = this.ctx;
-    const { field } = this.layout;
-    const labelW = min * 0.06;
-    const labelH = min * 0.02;
+    const labelW = min * 0.055;
+    const labelH = min * 0.018;
 
     ctx.save();
 
-    // Левый игрок - фиолетовый баннер повернутый
+    // Левый игрок
     ctx.save();
     ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
     ctx.rotate(-Math.PI / 2);
@@ -338,7 +342,7 @@ export class Renderer {
     ctx.beginPath();
     ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
     ctx.fill();
-    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
+    ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffffff";
@@ -353,16 +357,16 @@ export class Renderer {
     ctx.beginPath();
     ctx.roundRect(-labelW / 2, -labelH / 2, labelW, labelH, 3);
     ctx.fill();
-    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
+    ctx.font = `500 ${min * 0.012}px ${BRAND.fonts.brand}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffffff";
     ctx.fillText("ИГРОК 2", 0, 0);
     ctx.restore();
 
-    // Маскот-жучок возле каждого игрока
-    drawBug(ctx, controls.leftX + controls.size / 2, controls.labelY - min * 0.06, min * 0.022, BRAND.colors.accent);
-    drawBug(ctx, this.w - controls.rightX - controls.size / 2, controls.labelY - min * 0.06, min * 0.022, BRAND.colors.accent);
+    // Маскоты
+    drawBug(ctx, controls.leftX + controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
+    drawBug(ctx, this.w - controls.rightX - controls.size / 2, controls.labelY - min * 0.055, min * 0.018, BRAND.colors.accent);
 
     ctx.restore();
   }
@@ -370,29 +374,27 @@ export class Renderer {
   drawBottomButtons(bottomButtons, field, min) {
     const ctx = this.ctx;
     const btnH = bottomButtons.h;
-    const btnW1 = min * 0.16;
-    const btnW2 = min * 0.2;
-    const gap = min * 0.03;
+    const btnW1 = min * 0.14;
+    const btnW2 = min * 0.18;
 
     ctx.save();
 
-    // Левая кнопка - "8БИТ-РЕКОРД"
+    // Левая кнопка
     const btn1X = field.x;
     const btn1Y = bottomButtons.y;
     ctx.fillStyle = BRAND.colors.accent;
     ctx.beginPath();
     ctx.roundRect(btn1X, btn1Y, btnW1, btnH, 6);
     ctx.fill();
-    ctx.font = `500 ${min * 0.016}px ${BRAND.fonts.brand}`;
+    ctx.font = `500 ${min * 0.014}px ${BRAND.fonts.brand}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillStyle = "#ffffff";
     ctx.fillText("8БИТ-РЕКОРД", btn1X + btnW1 / 2, btn1Y + btnH / 2);
     
-    // Жучок на кнопке
-    drawBug(ctx, btn1X + min * 0.02, btn1Y + btnH / 2, min * 0.014, "#ffffff");
+    drawBug(ctx, btn1X + min * 0.016, btn1Y + btnH / 2, min * 0.012, "#ffffff");
 
-    // Правая кнопка - "ПОБЕЖДАЙ ПО-8БИТНОМУ!"
+    // Правая кнопка
     const btn2X = field.x + field.w - btnW2;
     ctx.fillStyle = BRAND.colors.bg;
     ctx.strokeStyle = BRAND.colors.accent;
@@ -401,13 +403,12 @@ export class Renderer {
     ctx.roundRect(btn2X, btn1Y, btnW2, btnH, 6);
     ctx.fill();
     ctx.stroke();
-    ctx.font = `500 ${min * 0.013}px ${BRAND.fonts.brand}`;
+    ctx.font = `500 ${min * 0.011}px ${BRAND.fonts.brand}`;
     ctx.fillStyle = BRAND.colors.text;
     ctx.fillText("ПОБЕЖДАЙ ПО-8БИТНОМУ!", btn2X + btnW2 / 2, btn1Y + btnH / 2);
 
-    // Жучок и звезда
-    drawBug(ctx, btn2X + min * 0.018, btn1Y + btnH / 2, min * 0.012, BRAND.colors.accent);
-    drawStar(ctx, btn2X + btnW2 - min * 0.025, btn1Y + btnH / 2, min * 0.01, BRAND.colors.accent, 1.5);
+    drawBug(ctx, btn2X + min * 0.015, btn1Y + btnH / 2, min * 0.01, BRAND.colors.accent);
+    drawStar(ctx, btn2X + btnW2 - min * 0.02, btn1Y + btnH / 2, min * 0.008, BRAND.colors.accent, 1.5);
 
     ctx.restore();
   }
@@ -433,7 +434,6 @@ export class Renderer {
     this.drawChrome(t);
 
     ctx.save();
-    // Клиппинг по полю
     ctx.beginPath();
     ctx.roundRect(f.x, f.y, f.w, f.h, f.r);
     ctx.clip();
@@ -441,11 +441,7 @@ export class Renderer {
 
     this.drawFieldNet();
     this.drawPaddles(state, t);
-
-    // Мяч - чип с лицом
-    const b = state.ball;
-    const dir = b.vx < 0 ? -1 : 1;
-    drawChip(ctx, b.x, b.y, b.r * 1.2, BRAND.colors.ink, dir);
+    this.drawBall(state, t);
 
     ctx.restore();
   }
@@ -455,41 +451,86 @@ export class Renderer {
     const left = state.paddles[0];
     const right = state.paddles[1];
 
-    // Левая ракетка - гусеница
-    drawCaterpillar(
-      ctx,
-      left.x + left.w / 2,
-      left.y,
-      left.w,
-      left.h,
-      BRAND.colors.ink,
-      t
-    );
+    // Левая ракетка - гусеница PNG
+    if (caterpillarImg.complete && caterpillarImg.naturalWidth > 0) {
+      const imgAspect = caterpillarImg.naturalWidth / caterpillarImg.naturalHeight;
+      const drawH = left.h;
+      const drawW = drawH * imgAspect;
+      ctx.drawImage(
+        caterpillarImg,
+        left.x + left.w / 2 - drawW / 2,
+        left.y,
+        drawW,
+        drawH
+      );
+    } else {
+      // Фолбек - белый прямоугольник
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(left.x, left.y, left.w, left.h);
+    }
 
-    // Правая ракетка - колючие блобы
-    drawSpikyColumn(
-      ctx,
-      right.x + right.w / 2,
-      right.y,
-      right.w,
-      right.h,
-      BRAND.colors.ink,
-      t
-    );
+    // Правая ракетка - колючая PNG
+    if (spikyImg.complete && spikyImg.naturalWidth > 0) {
+      const imgAspect = spikyImg.naturalWidth / spikyImg.naturalHeight;
+      const drawH = right.h;
+      const drawW = drawH * imgAspect;
+      ctx.drawImage(
+        spikyImg,
+        right.x + right.w / 2 - drawW / 2,
+        right.y,
+        drawW,
+        drawH
+      );
+    } else {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(right.x, right.y, right.w, right.h);
+    }
+  }
+
+  drawBall(state, t) {
+    const ctx = this.ctx;
+    const b = state.ball;
+    const size = b.r * 2.5;
+
+    if (ballImg.complete && ballImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      
+      // Поворачиваем мяч в направлении движения
+      if (b.vx < 0) {
+        ctx.scale(-1, 1);
+      }
+      
+      const imgAspect = ballImg.naturalWidth / ballImg.naturalHeight;
+      const drawW = size * imgAspect;
+      const drawH = size;
+      
+      ctx.drawImage(
+        ballImg,
+        -drawW / 2,
+        -drawH / 2,
+        drawW,
+        drawH
+      );
+      ctx.restore();
+    } else {
+      // Фолбек - белый квадрат
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(b.x - b.r, b.y - b.r, b.r * 2, b.r * 2);
+    }
   }
 
   drawScores(scores) {
     const ctx = this.ctx;
     const f = this.layout.field;
     const min = Math.min(this.w, this.h);
-    const cell = min * 0.008; // размер пикселя для цифр
+    const cell = min * 0.008;
 
     ctx.save();
 
-    // Пиксельные цифры в стиле брендбука
     const scoreY = f.y + f.h * 0.12;
 
-    // Счет слева (двухзначный)
+    // Счет слева
     const leftScore = String(scores[0]).padStart(2, "0");
     drawPixelNumber(ctx, leftScore, f.x + f.w * 0.28, scoreY, cell, BRAND.colors.ink);
 

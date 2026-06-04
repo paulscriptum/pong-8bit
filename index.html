@@ -18,21 +18,16 @@
 
     <!--
       Тач-управление (DOM-оверлей поверх canvas).
-      Игроки стоят слева/справа и смотрят друг на друга.
-      Ракетки ездят по вертикали (paddle up/down = screen Y).
-      data-dir = направление движения РАКЕТКИ ("up" | "down").
-      Подписи/ориентация кнопок настраиваются в controls.js + styles.css,
-      чтобы для каждого игрока стрелки читались как "влево/вправо"
-      относительно его тела (правый игрок повёрнут на 180°).
+      Стрелки указывают вверх/вниз - направление движения ракетки.
     -->
     <div class="controls" id="controls">
       <div class="controls-side controls-left" data-player="0">
-        <button class="ctrl-btn" type="button" data-player="0" data-dir="up" aria-label="Игрок 1: влево">←</button>
-        <button class="ctrl-btn" type="button" data-player="0" data-dir="down" aria-label="Игрок 1: вправо">→</button>
+        <button class="ctrl-btn" type="button" data-player="0" data-dir="up" aria-label="Игрок 1: вверх">↑</button>
+        <button class="ctrl-btn" type="button" data-player="0" data-dir="down" aria-label="Игрок 1: вниз">↓</button>
       </div>
       <div class="controls-side controls-right" data-player="1">
-        <button class="ctrl-btn" type="button" data-player="1" data-dir="down" aria-label="Игрок 2: влево">←</button>
-        <button class="ctrl-btn" type="button" data-player="1" data-dir="up" aria-label="Игрок 2: вправо">→</button>
+        <button class="ctrl-btn" type="button" data-player="1" data-dir="down" aria-label="Игрок 2: вверх">↑</button>
+        <button class="ctrl-btn" type="button" data-player="1" data-dir="up" aria-label="Игрок 2: вниз">↓</button>
       </div>
     </div>
   </div>
