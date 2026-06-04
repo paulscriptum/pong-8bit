@@ -9,13 +9,18 @@ import { makeQRCanvas } from "./blobs.js";
 import { PongGame } from "./game.js";
 import { Renderer } from "./render.js";
 import { setupControls } from "./controls.js";
-import { drawBug, drawHorizontalCaterpillar } from "./mascots.js";
+import { drawBug } from "./mascots.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 const game = new PongGame(BRAND.game);
 const renderer = new Renderer(ctx);
+
+// PNG гусеницы для standby экрана
+const standbyCaterpillarImg = new Image();
+standbyCaterpillarImg.crossOrigin = "anonymous";
+standbyCaterpillarImg.src = "/images/standby_caterpillar.png";
 
 let W = 0;
 let H = 0;
@@ -141,6 +146,7 @@ function drawText(text, x, y, size, color, font = BRAND.fonts.brand) {
 
 function update(dt) {
   renderer.updateParticles(dt);
+  renderer.updateMascots(dt);
 
   switch (state) {
     case STATE.ATTRACT:
@@ -156,10 +162,17 @@ function update(dt) {
       for (const e of events) {
         if (e.type === "paddle") {
           renderer.burst(e.x, e.y, 12, BRAND.palette);
+          // Показываем маскота при отбивании (30% шанс)
+          if (Math.random() < 0.3) {
+            renderer.showMascot(e.x, e.y, false);
+          }
         } else if (e.type === "wall") {
           renderer.burst(e.x, e.y, 6, [BRAND.colors.ink]);
         } else if (e.type === "score") {
           scored = true;
+          // Показываем маскота при голе (всегда)
+          const field = renderer.getFieldRect();
+          renderer.showMascot(field.w / 2, field.h / 2, true);
         }
       }
       if (game.over) {
@@ -217,19 +230,21 @@ function drawAttract() {
   ctx.fillText("НАЖМИ, ЧТОБЫ ИГРАТЬ", W / 2, H * 0.4);
   ctx.globalAlpha = 1;
 
-  // Анимированная горизонтальная гусеница внизу экрана
-  const segR = min * 0.028;
-  const segmentCount = 16;
-  const caterpillarWidth = segmentCount * segR * 1.4;
-  
-  // Гусеница ползет справа налево, зацикленно
-  const speed = 80; // пикселей в секунду
-  const totalPath = W + caterpillarWidth * 2;
-  const rawX = (elapsed * speed) % totalPath;
-  const catX = W + caterpillarWidth - rawX;
-  const catY = H * 0.75;
+  // Анимированная PNG гусеница внизу экрана (ползет справа налево)
+  if (standbyCaterpillarImg.complete && standbyCaterpillarImg.naturalWidth > 0) {
+    const catH = min * 0.08; // Высота гусеницы
+    const aspectRatio = standbyCaterpillarImg.naturalWidth / standbyCaterpillarImg.naturalHeight;
+    const catW = catH * aspectRatio;
+    
+    // Гусеница ползет справа налево, зацикленно
+    const speed = 100; // пикселей в секунду
+    const totalPath = W + catW * 2;
+    const rawX = (elapsed * speed) % totalPath;
+    const catX = W + catW - rawX;
+    const catY = H * 0.72;
 
-  drawHorizontalCaterpillar(ctx, catX, catY, segR, BRAND.colors.ink, elapsed, segmentCount);
+    ctx.drawImage(standbyCaterpillarImg, catX - catW, catY, catW, catH);
+  }
 
   ctx.restore();
 }
@@ -254,12 +269,14 @@ function drawPlay() {
   renderer.drawPlayfield(game.getState(), elapsed);
   renderer.drawScores(game.scores);
   renderer.drawParticles();
+  renderer.drawMascots();
 }
 
 function drawPoint() {
   renderer.drawPlayfield(game.getState(), elapsed);
   renderer.drawScores(game.scores);
   renderer.drawParticles();
+  renderer.drawMascots();
 
   const t = stateTime / POINT_PAUSE;
   const a = Math.max(0, 1 - t);

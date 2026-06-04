@@ -10,18 +10,68 @@ import {
   drawStar,
 } from "./mascots.js";
 
-// Загружаем PNG изображения
+// Загружаем PNG изображения из архива
 const caterpillarImg = new Image();
 caterpillarImg.crossOrigin = "anonymous";
-caterpillarImg.src = "/images/caterpillar.png";
+caterpillarImg.src = "/images/left_paddle_caterpillar.png";
 
 const spikyImg = new Image();
 spikyImg.crossOrigin = "anonymous";
-spikyImg.src = "/images/spiky.png";
+spikyImg.src = "/images/right_paddle_spiky.png";
 
 const ballImg = new Image();
 ballImg.crossOrigin = "anonymous";
-ballImg.src = "/images/ball.png";
+ballImg.src = "/images/ball_chip.png";
+
+// UI элементы из архива
+const titleImg = new Image();
+titleImg.crossOrigin = "anonymous";
+titleImg.src = "/images/title_8bit_pong.png";
+
+const speechBubbleImg = new Image();
+speechBubbleImg.crossOrigin = "anonymous";
+speechBubbleImg.src = "/images/speech_bubble_play_8bit.png";
+
+const labelPlayer1Img = new Image();
+labelPlayer1Img.crossOrigin = "anonymous";
+labelPlayer1Img.src = "/images/label_player_1.png";
+
+const labelPlayer2Img = new Image();
+labelPlayer2Img.crossOrigin = "anonymous";
+labelPlayer2Img.src = "/images/label_player_2.png";
+
+const badge8bitRecordImg = new Image();
+badge8bitRecordImg.crossOrigin = "anonymous";
+badge8bitRecordImg.src = "/images/badge_8bit_record.png";
+
+const badgeWin8bitImg = new Image();
+badgeWin8bitImg.crossOrigin = "anonymous";
+badgeWin8bitImg.src = "/images/badge_win_8bit.png";
+
+const buttonLeftImg = new Image();
+buttonLeftImg.crossOrigin = "anonymous";
+buttonLeftImg.src = "/images/button_left.png";
+
+const buttonRightImg = new Image();
+buttonRightImg.crossOrigin = "anonymous";
+buttonRightImg.src = "/images/button_right.png";
+
+// Маскоты для эффектов при отбивании и голах
+const mascotImages = [];
+const mascotPaths = [
+  "/images/mascots/hello.svg",
+  "/images/mascots/wow.svg",
+  "/images/mascots/win.svg",
+  "/images/mascots/score.svg",
+  "/images/mascots/star.svg",
+  "/images/mascots/smile.svg",
+  "/images/mascots/face.svg"
+];
+mascotPaths.forEach((path, i) => {
+  mascotImages[i] = new Image();
+  mascotImages[i].crossOrigin = "anonymous";
+  mascotImages[i].src = path;
+});
 
 export function computeSceneLayout(w, h) {
   const min = Math.min(w, h);
@@ -70,6 +120,7 @@ export class Renderer {
     this.w = 0;
     this.h = 0;
     this.particles = [];
+    this.mascotPopups = []; // Маскоты, появляющиеся при отбивании/голах
     this.layout = computeSceneLayout(0, 0);
   }
 
@@ -143,6 +194,73 @@ export class Renderer {
 
   clearParticles() {
     this.particles.length = 0;
+  }
+
+  // ---- маскоты при отбивании/голах ----
+
+  showMascot(x, y, isGoal = false) {
+    const base = Math.min(this.w, this.h);
+    const imgIndex = Math.floor(Math.random() * mascotImages.length);
+    const size = base * (isGoal ? 0.15 : 0.1);
+    const life = isGoal ? 1.2 : 0.7;
+    
+    this.mascotPopups.push({
+      x,
+      y,
+      size,
+      life,
+      maxLife: life,
+      imgIndex,
+      scale: 0, // Начинаем с 0 для анимации появления
+      vy: -base * 0.05, // Небольшое движение вверх
+    });
+  }
+
+  updateMascots(dt) {
+    const arr = this.mascotPopups;
+    for (let i = arr.length - 1; i >= 0; i--) {
+      const m = arr[i];
+      m.life -= dt;
+      m.y += m.vy * dt;
+      
+      // Анимация масштаба: появление -> показ -> исчезновение
+      const progress = 1 - (m.life / m.maxLife);
+      if (progress < 0.2) {
+        m.scale = progress / 0.2; // Появление
+      } else if (progress < 0.7) {
+        m.scale = 1; // Полный размер
+      } else {
+        m.scale = (1 - progress) / 0.3; // Исчезновение
+      }
+      
+      if (m.life <= 0) arr.splice(i, 1);
+    }
+  }
+
+  drawMascots() {
+    const ctx = this.ctx;
+    const f = this.layout.field;
+    
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    
+    for (const m of this.mascotPopups) {
+      const img = mascotImages[m.imgIndex];
+      if (!img || !img.complete) continue;
+      
+      const size = m.size * m.scale;
+      if (size <= 0) continue;
+      
+      ctx.globalAlpha = Math.min(1, m.scale * 1.5);
+      ctx.drawImage(img, m.x - size / 2, m.y - size / 2, size, size);
+    }
+    
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  clearMascots() {
+    this.mascotPopups.length = 0;
   }
 
   // ---- хром/обрамление ----
