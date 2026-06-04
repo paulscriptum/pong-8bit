@@ -71,14 +71,12 @@ function setState(s) {
 }
 
 function startMatch() {
-  console.log("[v0] startMatch called");
   // Показываем кнопки при начале игры
   document.getElementById("controls").style.display = "";
-  game.clearScores();
+  game.resetMatch();
   renderer.clearParticles();
   game.reset(Math.random() < 0.5 ? -1 : 1);
   setState(STATE.COUNTDOWN);
-  console.log("[v0] state after startMatch:", state);
 }
 
 function goAttract() {
@@ -118,11 +116,9 @@ function tryFullscreen() {
 }
 
 function onUserTap() {
-  console.log("[v0] onUserTap called, state:", state);
   Sfx.unlock();
   tryFullscreen();
   if (state === STATE.ATTRACT) {
-    console.log("[v0] Starting match from ATTRACT");
     startMatch();
     return true;
   }
@@ -132,6 +128,7 @@ function onUserTap() {
   }
   return false;
 }
+window.onUserTap = onUserTap;
 
 // Текстовые помощники
 function drawText(text, x, y, size, color, font = BRAND.fonts.brand) {
@@ -184,7 +181,6 @@ function update(dt) {
 }
 
 function draw() {
-  console.log("[v0] draw called, state:", state);
   switch (state) {
     case STATE.ATTRACT:
       drawAttract();
@@ -408,9 +404,32 @@ function init() {
   });
 
   canvas.addEventListener("pointerdown", (e) => {
-    console.log("[v0] pointerdown on canvas");
     e.preventDefault();
     onUserTap();
+  });
+  
+  // Fallback: клик по всему документу в attract режиме
+  document.addEventListener("pointerdown", (e) => {
+    if (state === STATE.ATTRACT) {
+      onUserTap();
+    }
+  });
+  
+  // Дополнительные события для совместимости
+  document.addEventListener("mousedown", (e) => {
+    if (state === STATE.ATTRACT) {
+      onUserTap();
+    }
+  });
+  document.addEventListener("touchstart", (e) => {
+    if (state === STATE.ATTRACT) {
+      onUserTap();
+    }
+  });
+  document.addEventListener("click", (e) => {
+    if (state === STATE.ATTRACT) {
+      onUserTap();
+    }
   });
 
   requestAnimationFrame(frame);
