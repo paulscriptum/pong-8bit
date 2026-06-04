@@ -1,30 +1,31 @@
 // ===========================================================
 // Бренд-токены 8БИТ + игровой конфиг. Единый источник правды.
-// Дизайн из брендбука: черный фон, белый текст, шрифт CoFo Drifter.
+// Дизайн из брендбука: светлый фон, фиолетовый акцент, черное поле.
 // ===========================================================
 
 export const BRAND = {
   colors: {
-    bg: "#000000", // черный фон как в брендбуке
-    field: "#000000",
-    text: "#ffffff",
-    ink: "#ffffff",
-    accent: "#ffffff", // белый акцент
-    accentDark: "#cccccc",
-    dim: "#666666",
-    line: "rgba(255,255,255,0.3)",
+    bg: "#E8E4E0", // светло-серый/бежевый фон
+    field: "#0c0c0c", // черное игровое поле
+    text: "#0c0c0c", // темный текст для UI
+    ink: "#ffffff", // белые элементы на поле
+    accent: "#6B5CE7", // фиолетовый акцент
+    accentDark: "#5A4BD6",
+    dim: "#999999",
+    line: "rgba(255,255,255,0.4)",
+    fieldBorder: "#6B5CE7", // фиолетовая рамка поля
   },
 
-  // Мультиколор-палитра 8БИТ — для частиц/конфетти/блобов.
-  palette: ["#ffffff", "#cccccc", "#999999", "#666666"],
+  // Мультиколор-палитра 8БИТ — для частиц/конфетти.
+  palette: ["#6B5CE7", "#ffffff", "#E8E4E0", "#0c0c0c"],
 
   fonts: {
-    display: '"CoFo Driffter", "Comic Sans MS", cursive', // брендовый шрифт
+    display: '"CoFo Driffter", "Comic Sans MS", cursive',
     brand: '"CoFo Driffter", "Comic Sans MS", cursive',
     ui: '"CoFo Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
   },
 
-  // Брендинг победного экрана.
+  // Брендинг.
   brandName: "8БИТ",
   title: "8БИТ PONG",
   cta: "ИГРАЙ ПО-8БИТНОМУ!",
@@ -32,26 +33,26 @@ export const BRAND = {
   url: "https://t.me/bit8journal",
 
   layout: {
-    fieldWidthRatio: 0.82,
-    fieldHeightRatio: 0.72,
+    fieldWidthRatio: 0.68,
+    fieldHeightRatio: 0.58,
     fieldRadiusRatio: 0.02,
     controlsInsetRatio: 0.035,
   },
 
-  // Игровые параметры (можно крутить).
+  // Игровые параметры.
   game: {
-    targetScore: 5, // играем до N очков
-    paddleHeightRatio: 0.28, // высота маскот-столбика от высоты поля
-    paddleWidthPx: 60,
-    paddleMarginRatio: 0.06, // отступ ракетки от края внутреннего поля
-    ballRadiusPx: 12,
-    ballStartSpeedRatio: 0.42, // стартовая скорость мяча (ширина/сек)
-    ballSpeedup: 1.04, // множитель скорости за удар ракеткой
-    maxBallSpeedRatio: 1.1, // потолок скорости (ширина/сек)
-    maxBounceAngle: Math.PI / 3, // макс. угол отскока от ракетки
-    paddleSpeedRatio: 1.3, // скорость движения ракетки (высота/сек)
+    targetScore: 5,
+    paddleHeightRatio: 0.42, // высота маскот-столбика (больше для маскотов)
+    paddleWidthPx: 50,
+    paddleMarginRatio: 0.04,
+    ballRadiusPx: 18,
+    ballStartSpeedRatio: 0.38,
+    ballSpeedup: 1.04,
+    maxBallSpeedRatio: 1.0,
+    maxBounceAngle: Math.PI / 3,
+    paddleSpeedRatio: 1.2,
     countdownSeconds: 3,
-    gameOverSeconds: 14, // авто-возврат на attract
+    gameOverSeconds: 14,
   },
 };
 

@@ -1,6 +1,6 @@
 // ===========================================================
 // ПОНГ · 8БИТ — bootstrap, game loop и конечный автомат экранов.
-// Дизайн в стиле брендбука: черный фон, белый текст, CoFo Drifter.
+// Дизайн в стиле брендбука: светлый фон, фиолетовый акцент.
 // ===========================================================
 
 import BRAND from "./brand.js";
@@ -9,6 +9,7 @@ import { makeQRCanvas } from "./blobs.js";
 import { PongGame } from "./game.js";
 import { Renderer } from "./render.js";
 import { setupControls } from "./controls.js";
+import { drawBug } from "./mascots.js";
 
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
@@ -151,7 +152,7 @@ function update(dt) {
         if (e.type === "paddle") {
           renderer.burst(e.x, e.y, 12, BRAND.palette);
         } else if (e.type === "wall") {
-          renderer.burst(e.x, e.y, 6, [BRAND.colors.text]);
+          renderer.burst(e.x, e.y, 6, [BRAND.colors.ink]);
         } else if (e.type === "score") {
           scored = true;
         }
@@ -196,26 +197,27 @@ function draw() {
 
 function drawAttract() {
   const min = Math.min(W, H);
-  const state = game.getState();
-  renderer.drawPlayfield(state, elapsed);
+  const gameState = game.getState();
+  renderer.drawPlayfield(gameState, elapsed);
   renderer.drawScores(game.scores);
 
   const field = renderer.getFieldRect();
-  
+
   ctx.save();
-  // Затемнение центра для текста (не перекрывает ракетки по бокам)
-  const overlayMargin = field.w * 0.15;
-  ctx.fillStyle = "rgba(0,0,0,0.6)";
-  ctx.fillRect(field.x + overlayMargin, field.y, field.w - overlayMargin * 2, field.h);
+  // Полупрозрачный оверлей на поле
+  ctx.fillStyle = "rgba(12,12,12,0.75)";
+  ctx.beginPath();
+  ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
+  ctx.fill();
 
   // Пульсирующий текст
-  ctx.globalAlpha = 0.6 + 0.4 * Math.sin(elapsed * 2.5);
+  ctx.globalAlpha = 0.7 + 0.3 * Math.sin(elapsed * 2.5);
   drawText(
     "КОСНИСЬ, ЧТОБЫ НАЧАТЬ",
     W / 2,
     field.y + field.h * 0.5,
-    min * 0.035,
-    BRAND.colors.text,
+    min * 0.032,
+    BRAND.colors.ink,
     BRAND.fonts.brand
   );
   ctx.globalAlpha = 1;
@@ -230,10 +232,10 @@ function drawCountdown() {
   const field = renderer.getFieldRect();
   const left = Math.max(0, BRAND.game.countdownSeconds - stateTime);
   const n = Math.max(1, Math.ceil(left));
-  
+
   ctx.save();
-  ctx.globalAlpha = 0.9;
-  drawText(String(n), W / 2, field.y + field.h * 0.5, min * 0.15, BRAND.colors.text);
+  ctx.globalAlpha = 0.95;
+  drawText(String(n), W / 2, field.y + field.h * 0.5, min * 0.14, BRAND.colors.ink);
   ctx.globalAlpha = 1;
   ctx.restore();
 }
@@ -253,9 +255,9 @@ function drawPoint() {
   const a = Math.max(0, 1 - t);
   const min = Math.min(W, H);
   const field = renderer.getFieldRect();
-  
+
   ctx.globalAlpha = a;
-  drawText("ГОЛ!", W / 2, field.y + field.h * 0.5, min * 0.1, BRAND.colors.text, BRAND.fonts.brand);
+  drawText("ГОЛ!", W / 2, field.y + field.h * 0.5, min * 0.1, BRAND.colors.ink, BRAND.fonts.brand);
   ctx.globalAlpha = 1;
 }
 
@@ -265,47 +267,62 @@ function drawGameOver() {
   const field = renderer.getFieldRect();
 
   ctx.save();
-  
-  // Полупрозрачный фон
-  ctx.fillStyle = "rgba(0,0,0,0.85)";
-  ctx.fillRect(field.x, field.y, field.w, field.h);
 
-  // Тонкая рамка
-  ctx.strokeStyle = BRAND.colors.text;
-  ctx.lineWidth = 2;
-  ctx.strokeRect(field.x, field.y, field.w, field.h);
+  // Черный фон поля
+  ctx.fillStyle = BRAND.colors.field;
+  ctx.beginPath();
+  ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
+  ctx.fill();
 
-  drawText("ПОБЕДА!", W / 2, field.y + field.h * 0.2, min * 0.08, BRAND.colors.text, BRAND.fonts.brand);
+  // Фиолетовая рамка
+  ctx.strokeStyle = BRAND.colors.accent;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Победный текст
+  drawText("ПОБЕДА!", W / 2, field.y + field.h * 0.18, min * 0.07, BRAND.colors.ink, BRAND.fonts.brand);
   drawText(
     `Игрок ${Math.max(0, winner) + 1}`,
     W / 2,
-    field.y + field.h * 0.32,
-    min * 0.04,
-    BRAND.colors.text,
+    field.y + field.h * 0.3,
+    min * 0.035,
+    BRAND.colors.ink,
     BRAND.fonts.ui
   );
   drawText(
     `${game.scores[0]} : ${game.scores[1]}`,
     W / 2,
-    field.y + field.h * 0.44,
-    min * 0.045,
-    BRAND.colors.text
+    field.y + field.h * 0.42,
+    min * 0.04,
+    BRAND.colors.ink
   );
 
-  // CTA текст в стиле брендбука
-  drawText("Читайте журнал в телеграме", W / 2, field.y + field.h * 0.58, min * 0.032, BRAND.colors.text, BRAND.fonts.brand);
+  // CTA текст
+  drawText(
+    "Читайте журнал в телеграме",
+    W / 2,
+    field.y + field.h * 0.56,
+    min * 0.028,
+    BRAND.colors.ink,
+    BRAND.fonts.brand
+  );
 
-  const qrSize = min * 0.16;
-  drawQR(W / 2, field.y + field.h * 0.76, qrSize);
+  // QR код
+  const qrSize = min * 0.14;
+  drawQR(W / 2, field.y + field.h * 0.74, qrSize);
 
   drawText(
     BRAND.ctaSub,
     W / 2,
-    field.y + field.h * 0.76 + qrSize * 0.7,
-    min * 0.022,
-    BRAND.colors.text,
+    field.y + field.h * 0.74 + qrSize * 0.65,
+    min * 0.02,
+    BRAND.colors.ink,
     BRAND.fonts.ui
   );
+
+  // Жучок
+  drawBug(ctx, W / 2 - qrSize * 0.7, field.y + field.h * 0.56, min * 0.02, BRAND.colors.ink);
+
   ctx.restore();
 }
 
@@ -315,9 +332,9 @@ function drawQR(cx, cy, size) {
     ctx.drawImage(qrCanvas, cx - size / 2, cy - size / 2, size, size);
   } else {
     // Плейсхолдер
-    ctx.fillStyle = BRAND.colors.text;
+    ctx.fillStyle = BRAND.colors.ink;
     ctx.fillRect(cx - size / 2, cy - size / 2, size, size);
-    ctx.fillStyle = BRAND.colors.bg;
+    ctx.fillStyle = BRAND.colors.field;
     ctx.fillRect(cx - size / 2 + 4, cy - size / 2 + 4, size - 8, size - 8);
   }
 }
