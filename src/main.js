@@ -67,19 +67,25 @@ function resize() {
 function setState(s) {
   state = s;
   stateTime = 0;
+  window._debugState = s;
 }
 
 function startMatch() {
-  game.resetMatch();
-  winner = -1;
+  console.log("[v0] startMatch called");
+  // Показываем кнопки при начале игры
+  document.getElementById("controls").style.display = "";
+  game.clearScores();
   renderer.clearParticles();
   game.reset(Math.random() < 0.5 ? -1 : 1);
   setState(STATE.COUNTDOWN);
+  console.log("[v0] state after startMatch:", state);
 }
 
 function goAttract() {
   qrCanvas = null;
   game.clearInput();
+  // Скрываем кнопки в standby режиме
+  document.getElementById("controls").style.display = "none";
   setState(STATE.ATTRACT);
 }
 
@@ -112,9 +118,11 @@ function tryFullscreen() {
 }
 
 function onUserTap() {
+  console.log("[v0] onUserTap called, state:", state);
   Sfx.unlock();
   tryFullscreen();
   if (state === STATE.ATTRACT) {
+    console.log("[v0] Starting match from ATTRACT");
     startMatch();
     return true;
   }
@@ -176,6 +184,7 @@ function update(dt) {
 }
 
 function draw() {
+  console.log("[v0] draw called, state:", state);
   switch (state) {
     case STATE.ATTRACT:
       drawAttract();
@@ -197,43 +206,32 @@ function draw() {
 
 function drawAttract() {
   const min = Math.min(W, H);
-  const field = renderer.getFieldRect();
 
-  // Рисуем внешний UI (логотип, заголовок, кнопки)
-  renderer.drawChrome(elapsed);
-
-  // Фиолетовый фон на все поле (как в Figma)
+  // Фиолетовый фон на ВЕСЬ экран (fullscreen standby)
   ctx.save();
   ctx.fillStyle = BRAND.colors.accent;
-  ctx.beginPath();
-  ctx.roundRect(field.x, field.y, field.w, field.h, field.r);
-  ctx.fill();
-
-  // Фиолетовая рамка
-  ctx.strokeStyle = BRAND.colors.accent;
-  ctx.lineWidth = 3;
-  ctx.stroke();
+  ctx.fillRect(0, 0, W, H);
 
   // Текст "НАЖМИ, ЧТОБЫ ИГРАТЬ" по центру (пульсирующий)
   ctx.globalAlpha = 0.85 + 0.15 * Math.sin(elapsed * 2.5);
-  ctx.font = `700 ${min * 0.038}px ${BRAND.fonts.brand}`;
+  ctx.font = `700 ${min * 0.05}px ${BRAND.fonts.brand}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = BRAND.colors.ink;
-  ctx.fillText("НАЖМИ, ЧТОБЫ ИГРАТЬ", W / 2, field.y + field.h * 0.4);
+  ctx.fillText("НАЖМИ, ЧТОБЫ ИГРАТЬ", W / 2, H * 0.4);
   ctx.globalAlpha = 1;
 
   // Анимированная горизонтальная гусеница внизу экрана
-  const segR = min * 0.022;
-  const segmentCount = 14;
+  const segR = min * 0.028;
+  const segmentCount = 16;
   const caterpillarWidth = segmentCount * segR * 1.4;
   
   // Гусеница ползет справа налево, зацикленно
-  const speed = 60; // пикселей в секунду
-  const totalPath = field.w + caterpillarWidth * 2;
+  const speed = 80; // пикселей в секунду
+  const totalPath = W + caterpillarWidth * 2;
   const rawX = (elapsed * speed) % totalPath;
-  const catX = field.x + field.w + caterpillarWidth - rawX;
-  const catY = field.y + field.h * 0.78;
+  const catX = W + caterpillarWidth - rawX;
+  const catY = H * 0.75;
 
   drawHorizontalCaterpillar(ctx, catX, catY, segR, BRAND.colors.ink, elapsed, segmentCount);
 
@@ -395,6 +393,9 @@ function init() {
   resize();
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", resize);
+  
+  // Инициализируем state
+  setState(STATE.ATTRACT);
 
   setupKiosk();
 
@@ -407,6 +408,7 @@ function init() {
   });
 
   canvas.addEventListener("pointerdown", (e) => {
+    console.log("[v0] pointerdown on canvas");
     e.preventDefault();
     onUserTap();
   });

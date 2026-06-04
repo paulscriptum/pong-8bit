@@ -19,8 +19,9 @@
     <!--
       Тач-управление (DOM-оверлей поверх canvas).
       Стрелки указывают вверх/вниз - направление движения ракетки.
+      Изначально скрыто - показывается только во время игры.
     -->
-    <div class="controls" id="controls">
+    <div class="controls" id="controls" style="display: none;">
       <div class="controls-side controls-left" data-player="0">
         <button class="ctrl-btn" type="button" data-player="0" data-dir="up" aria-label="Игрок 1: вверх">↑</button>
         <button class="ctrl-btn" type="button" data-player="0" data-dir="down" aria-label="Игрок 1: вниз">↓</button>
