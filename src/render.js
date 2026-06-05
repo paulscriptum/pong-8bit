@@ -506,24 +506,24 @@ export class Renderer {
     const usePngLabels = labelPlayer1Img.complete && labelPlayer1Img.naturalWidth > 0;
     
     if (usePngLabels) {
-      // Левый игрок - PNG (поворот на -90° - текст читается снизу вверх слева)
+      // Левый игрок - PNG (поворот на +90° - текст читается сверху вниз, смотрит на поле)
       const labelH = min * 0.08;
       const labelW = (labelPlayer1Img.naturalWidth / labelPlayer1Img.naturalHeight) * labelH;
       
       ctx.save();
       ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
-      ctx.rotate(-Math.PI / 2);
+      ctx.rotate(Math.PI / 2);
       ctx.drawImage(labelPlayer1Img, -labelW / 2, -labelH / 2, labelW, labelH);
       ctx.restore();
       
-      // Правый игрок - PNG (поворот на +90° - текст читается сверху вниз справа)
+      // Правый игрок - PNG (поворот на -90° - текст читается снизу вверх, смотрит на поле)
       if (labelPlayer2Img.complete && labelPlayer2Img.naturalWidth > 0) {
         const labelH2 = min * 0.08;
         const labelW2 = (labelPlayer2Img.naturalWidth / labelPlayer2Img.naturalHeight) * labelH2;
         
         ctx.save();
         ctx.translate(this.w - controls.rightX - controls.size / 2, controls.labelY);
-        ctx.rotate(Math.PI / 2);
+        ctx.rotate(-Math.PI / 2);
         ctx.drawImage(labelPlayer2Img, -labelW2 / 2, -labelH2 / 2, labelW2, labelH2);
         ctx.restore();
       }
