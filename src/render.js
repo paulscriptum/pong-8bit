@@ -273,21 +273,28 @@ export class Renderer {
     ctx.save();
     ctx.translate(f.x, f.y);
     
-    // Инвертируем цвета чтобы черные SVG стали белыми на черном поле
-    ctx.filter = "invert(1)";
-    
     for (const m of this.mascotPopups) {
       const img = mascotImages[m.imgIndex];
-      if (!img || !img.complete) continue;
+      if (!img || !img.complete || !img.naturalWidth) continue;
       
-      const size = m.size * m.scale;
-      if (size <= 0) continue;
+      const scale = m.size * m.scale;
+      if (scale <= 0) continue;
+      
+      // Сохраняем пропорции изображения
+      const aspectRatio = img.naturalWidth / img.naturalHeight;
+      let drawW, drawH;
+      if (aspectRatio > 1) {
+        drawW = scale;
+        drawH = scale / aspectRatio;
+      } else {
+        drawH = scale;
+        drawW = scale * aspectRatio;
+      }
       
       ctx.globalAlpha = Math.min(1, m.scale * 1.5);
-      ctx.drawImage(img, m.x - size / 2, m.y - size / 2, size, size);
+      ctx.drawImage(img, m.x - drawW / 2, m.y - drawH / 2, drawW, drawH);
     }
     
-    ctx.filter = "none";
     ctx.globalAlpha = 1;
     ctx.restore();
   }
@@ -510,7 +517,7 @@ export class Renderer {
         ctx.restore();
       }
       
-      // Иконки игроков (маскоты над лейблами)
+      // Иконки игроков (маскоты над ле��блами)
       if (iconPlayer1Img.complete && iconPlayer1Img.naturalWidth > 0) {
         const iconH = min * 0.03;
         const iconW = (iconPlayer1Img.naturalWidth / iconPlayer1Img.naturalHeight) * iconH;
