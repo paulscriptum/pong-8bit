@@ -506,38 +506,50 @@ export class Renderer {
     const usePngLabels = labelPlayer1Img.complete && labelPlayer1Img.naturalWidth > 0;
     
     if (usePngLabels) {
-      // Левый игрок - PNG (поворот на +90° - текст читается сверху вниз, смотрит на поле)
-      const labelH = min * 0.08;
-      const labelW = (labelPlayer1Img.naturalWidth / labelPlayer1Img.naturalHeight) * labelH;
+      // Левый игрок - PNG
+      // Текст должен идти СВЕРХУ ВНИЗ ("ИГРОК" наверху, "1" внизу)
+      // После поворота на 90° ширина становится высотой
+      const labelSize = min * 0.08;
+      const labelAspect = labelPlayer1Img.naturalWidth / labelPlayer1Img.naturalHeight;
+      const labelW = labelSize * labelAspect;
+      const labelH = labelSize;
       
       ctx.save();
       ctx.translate(controls.leftX + controls.size / 2, controls.labelY);
+      // Поворачиваем на 90° по часовой - правый край изображения будет сверху
       ctx.rotate(Math.PI / 2);
       ctx.drawImage(labelPlayer1Img, -labelW / 2, -labelH / 2, labelW, labelH);
       ctx.restore();
       
-      // Правый игрок - PNG (поворот на -90° - текст читается снизу вверх, смотрит на поле)
+      // Иконка игрока 1 (визуально справа после поворота, т.е. ниже по Y в оригинале)
+      if (iconPlayer1Img.complete && iconPlayer1Img.naturalWidth > 0) {
+        const iconH = min * 0.035;
+        const iconW = (iconPlayer1Img.naturalWidth / iconPlayer1Img.naturalHeight) * iconH;
+        // После поворота labelW стал высотой визуально
+        ctx.drawImage(iconPlayer1Img, controls.leftX + controls.size / 2 - iconW / 2, controls.labelY + labelW / 2 + min * 0.01, iconW, iconH);
+      }
+      
+      // Правый игрок - PNG
+      // Текст должен идти СНИЗУ ВВЕРХ ("2" наверху, "ИГРОК" внизу)
       if (labelPlayer2Img.complete && labelPlayer2Img.naturalWidth > 0) {
-        const labelH2 = min * 0.08;
-        const labelW2 = (labelPlayer2Img.naturalWidth / labelPlayer2Img.naturalHeight) * labelH2;
+        const labelSize2 = min * 0.08;
+        const labelAspect2 = labelPlayer2Img.naturalWidth / labelPlayer2Img.naturalHeight;
+        const labelW2 = labelSize2 * labelAspect2;
+        const labelH2 = labelSize2;
         
         ctx.save();
         ctx.translate(this.w - controls.rightX - controls.size / 2, controls.labelY);
+        // Поворачиваем на -90° против часовой - левый край изображения будет сверху
         ctx.rotate(-Math.PI / 2);
         ctx.drawImage(labelPlayer2Img, -labelW2 / 2, -labelH2 / 2, labelW2, labelH2);
         ctx.restore();
-      }
-      
-      // Иконки игроков (маскоты над ле��блами)
-      if (iconPlayer1Img.complete && iconPlayer1Img.naturalWidth > 0) {
-        const iconH = min * 0.03;
-        const iconW = (iconPlayer1Img.naturalWidth / iconPlayer1Img.naturalHeight) * iconH;
-        ctx.drawImage(iconPlayer1Img, controls.leftX + controls.size / 2 - iconW / 2, controls.labelY - min * 0.06, iconW, iconH);
-      }
-      if (iconPlayer2Img.complete && iconPlayer2Img.naturalWidth > 0) {
-        const iconH = min * 0.03;
-        const iconW = (iconPlayer2Img.naturalWidth / iconPlayer2Img.naturalHeight) * iconH;
-        ctx.drawImage(iconPlayer2Img, this.w - controls.rightX - controls.size / 2 - iconW / 2, controls.labelY - min * 0.06, iconW, iconH);
+        
+        // Иконка игрока 2 (визуально слева после поворота, т.е. выше по Y в оригинале)
+        if (iconPlayer2Img.complete && iconPlayer2Img.naturalWidth > 0) {
+          const iconH = min * 0.035;
+          const iconW = (iconPlayer2Img.naturalWidth / iconPlayer2Img.naturalHeight) * iconH;
+          ctx.drawImage(iconPlayer2Img, this.w - controls.rightX - controls.size / 2 - iconW / 2, controls.labelY - labelW2 / 2 - iconH - min * 0.01, iconW, iconH);
+        }
       }
     } else {
       // Fallback - рисуем программно
