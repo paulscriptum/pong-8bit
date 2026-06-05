@@ -1,7 +1,6 @@
 /* ===========================================================
-   ПОНГ · 8БИТ — базовые стили + kiosk reset.
-   Цвета/токены дублируют src/brand.js (источник правды — brand.js).
-   CORE-воркер может расширять этот файл (раскладка кнопок, экраны).
+   ПОНГ · 8БИТ — стили в стиле брендбука.
+   Светлый фон, фиолетовые акценты, черное игровое поле.
    =========================================================== */
 
 @font-face {
@@ -53,18 +52,21 @@
 }
 
 :root {
-  --bg: #d9d6d1;
+  --bg: #E8E4E0;
+  --field: #0c0c0c;
   --text: #0c0c0c;
-  --accent: #6e2bff;
-  --dim: #6f6b78;
-  --font-display: "Press Start 2P", monospace;
+  --ink: #ffffff;
+  --accent: #6B5CE7;
+  --accent-dark: #5A4BD6;
+  --dim: #999999;
+  --font-display: "CoFo Driffter", "Comic Sans MS", cursive;
   --font-brand: "CoFo Driffter", "Comic Sans MS", cursive;
   --font-ui: "CoFo Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --control-top: 46%;
-  --control-left-x: 3.4vw;
-  --control-right-x: 3.4vw;
-  --control-gap: 2.2vmin;
-  --control-size: clamp(72px, 7.5vmin, 118px);
+  --control-top: 50%;
+  --control-left-x: 2vw;
+  --control-right-x: 2vw;
+  --control-gap: 1.5vmin;
+  --control-size: clamp(52px, 5.5vmin, 90px);
   --label-top: 27%;
 }
 
@@ -111,7 +113,7 @@ body {
 .controls {
   position: absolute;
   inset: 0;
-  pointer-events: none; /* активны только сами кнопки */
+  pointer-events: none;
   z-index: 10;
 }
 
@@ -135,29 +137,57 @@ body {
   transform: translateY(-50%) rotate(180deg);
 }
 
+/* Кнопки управления - используем PNG из архива, повернутые на 90° */
 .ctrl-btn {
   pointer-events: auto;
   width: var(--control-size);
   height: var(--control-size);
-  border-radius: 26%;
-  border: clamp(2px, 0.24vmin, 4px) solid var(--accent);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-weight: 700;
-  font-size: calc(var(--control-size) * 0.48);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 12px;
+  border: none;
+  background: url('/images/button_left.png') center/contain no-repeat;
+  color: transparent;
+  font-size: 0;
   cursor: pointer;
   touch-action: none;
-  transition: transform 0.06s ease, background 0.1s ease, color 0.1s ease;
+  transition: transform 0.06s ease, opacity 0.1s ease;
+  position: relative;
+  transform: rotate(90deg); /* Поворачиваем стрелку вверх */
+}
+
+/* Кнопка вниз - поворот на -90° */
+.ctrl-btn[data-dir="down"] {
+  transform: rotate(-90deg);
+}
+
+/* Правые кнопки используют button_right.png */
+.controls-right .ctrl-btn {
+  background-image: url('/images/button_right.png');
+  transform: rotate(-90deg); /* Поворачиваем стрелку вверх */
+}
+
+.controls-right .ctrl-btn[data-dir="up"] {
+  transform: rotate(90deg); /* Вниз для правого игрока */
 }
 
 .ctrl-btn.is-active {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #ffffff;
-  transform: scale(0.94);
+  filter: brightness(0.9);
+  opacity: 0.85;
+}
+
+/* Убираем outline на фокусе */
+.ctrl-btn:focus {
+  outline: none;
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 600px) {
+  :root {
+    --control-size: clamp(44px, 10vw, 70px);
+  }
+}
+
+@media (orientation: portrait) {
+  :root {
+    --control-top: 50%;
+  }
 }
