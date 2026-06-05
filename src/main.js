@@ -221,13 +221,13 @@ function drawAttract() {
   ctx.fillStyle = BRAND.colors.accent;
   ctx.fillRect(0, 0, W, H);
 
-  // Текст "НАЖМИ, ЧТОБЫ ИГРАТЬ" по центру (пульсирующий)
+  // Текст "НАЖМИТЕ, ЧТОБЫ ИГРАТЬ" по центру (пульсирующий)
   ctx.globalAlpha = 0.85 + 0.15 * Math.sin(elapsed * 2.5);
   ctx.font = `700 ${min * 0.05}px ${BRAND.fonts.brand}`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillStyle = BRAND.colors.ink;
-  ctx.fillText("НАЖМИ, ЧТОБЫ ИГРАТЬ", W / 2, H * 0.4);
+  ctx.fillText("НАЖМИТЕ, ЧТОБЫ ИГРАТЬ", W / 2, H * 0.4);
   ctx.globalAlpha = 1;
 
   // Анимированная PNG гусеница внизу экрана (ползет справа налево)

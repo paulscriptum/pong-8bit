@@ -81,7 +81,7 @@ const buttonRightImg = new Image();
 buttonRightImg.crossOrigin = "anonymous";
 buttonRightImg.src = "/images/button_right.png";
 
-// Маскоты для эффектов при отбивании и голах
+// Маскоты для эффектов при отбивании и голах (SVG с прозрачным фоном)
 const mascotImages = [];
 const mascotPaths = [
   "/images/mascots/hello.svg",
@@ -90,7 +90,11 @@ const mascotPaths = [
   "/images/mascots/score.svg",
   "/images/mascots/star.svg",
   "/images/mascots/smile.svg",
-  "/images/mascots/face.svg"
+  "/images/mascots/gamepad.svg",
+  "/images/mascots/cool.svg",
+  "/images/mascots/caterpillar.svg",
+  "/images/mascots/wavy.svg",
+  "/images/mascots/sad.svg"
 ];
 mascotPaths.forEach((path, i) => {
   mascotImages[i] = new Image();
@@ -269,6 +273,9 @@ export class Renderer {
     ctx.save();
     ctx.translate(f.x, f.y);
     
+    // Инвертируем цвета чтобы черные SVG стали белыми на черном поле
+    ctx.filter = "invert(1)";
+    
     for (const m of this.mascotPopups) {
       const img = mascotImages[m.imgIndex];
       if (!img || !img.complete) continue;
@@ -280,6 +287,7 @@ export class Renderer {
       ctx.drawImage(img, m.x - size / 2, m.y - size / 2, size, size);
     }
     
+    ctx.filter = "none";
     ctx.globalAlpha = 1;
     ctx.restore();
   }
