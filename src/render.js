@@ -81,21 +81,24 @@ const buttonRightImg = new Image();
 buttonRightImg.crossOrigin = "anonymous";
 buttonRightImg.src = "/images/button_right.png";
 
-// Маскоты для эффектов при отбивании и голах (SVG с прозрачным фоном)
+// Маскоты для эффектов при отбивании и голах (PNG с прозрачным фоном)
 const mascotImages = [];
 const mascotPaths = [
-  "/images/mascots/hello.svg",
-  "/images/mascots/wow.svg",
-  "/images/mascots/win.svg",
-  "/images/mascots/score.svg",
-  "/images/mascots/star.svg",
-  "/images/mascots/smile.svg",
-  "/images/mascots/gamepad.svg",
-  "/images/mascots/cool.svg",
-  "/images/mascots/caterpillar.svg",
-  "/images/mascots/wavy.svg",
-  "/images/mascots/sad.svg"
+  "/images/mascots/hello.png",   // 0 - черный, нужен invert
+  "/images/mascots/wow.png",     // 1 - черный, нужен invert
+  "/images/mascots/win.png",     // 2 - черный, нужен invert
+  "/images/mascots/score.png",   // 3 - черный, нужен invert
+  "/images/mascots/star.png",    // 4 - черный, нужен invert
+  "/images/mascots/smile.png",   // 5 - черный, нужен invert
+  "/images/mascots/gamepad.png", // 6 - черный, нужен invert
+  "/images/mascots/cool.png",    // 7 - черный, нужен invert
+  "/images/mascots/caterpillar.png", // 8 - белый
+  "/images/mascots/wavy.svg",    // 9 - оставляем SVG
+  "/images/mascots/sad.svg"      // 10 - оставляем SVG
 ];
+
+// Маски для инвертирования (черные маскоты нуждаются в инверсии чтобы стать белыми)
+const invertMascots = new Set([0, 1, 2, 3, 4, 5, 6, 7]);
 mascotPaths.forEach((path, i) => {
   mascotImages[i] = new Image();
   mascotImages[i].crossOrigin = "anonymous";
@@ -292,7 +295,15 @@ export class Renderer {
       }
       
       ctx.globalAlpha = Math.min(1, m.scale * 1.5);
+      
+      // Применяем инверсию для черных маскотов
+      if (invertMascots.has(m.imgIndex)) {
+        ctx.filter = "invert(1)";
+      }
+      
       ctx.drawImage(img, m.x - drawW / 2, m.y - drawH / 2, drawW, drawH);
+      
+      ctx.filter = "none";
     }
     
     ctx.globalAlpha = 1;
